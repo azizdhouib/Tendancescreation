@@ -17,7 +17,8 @@ const ProductCard = ({ product }) => {
     toast.success(`${product.name} ajouté au panier`);
   };
 
-  const defaultImages = ['/bouquet.PNG', '/cadeau enfant.PNG'];
+  const basePath = import.meta.env.BASE_URL || '/';
+  const defaultImages = [`${basePath}bouquet.PNG`, `${basePath}cadeau enfant.PNG`];
   const imageUrl = product.images?.[0] 
     ? product.images[0] 
     : defaultImages[product._id?.charCodeAt(0) % 2 || 0];

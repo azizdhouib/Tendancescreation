@@ -93,12 +93,12 @@ const Home = () => {
               />
               <div className="grid grid-cols-2 gap-4">
                 <img
-                  src="/bouquet.PNG"
+                  src={`${import.meta.env.BASE_URL}bouquet.PNG`}
                   alt="Bouquet élégant"
                   className="relative rounded-3xl shadow-2xl transform hover:scale-105 transition-transform duration-500"
                 />
                 <img
-                  src="/cadeau enfant.PNG"
+                  src={`${import.meta.env.BASE_URL}cadeau enfant.PNG`}
                   alt="Cadeau enfant"
                   className="relative rounded-3xl shadow-2xl transform hover:scale-105 transition-transform duration-500 mt-8"
                 />

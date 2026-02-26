@@ -72,7 +72,8 @@ const Product = () => {
     );
   }
 
-  const defaultImages = ['/bouquet.PNG', '/cadeau enfant.PNG'];
+  const basePath = import.meta.env.BASE_URL || '/';
+  const defaultImages = [`${basePath}bouquet.PNG`, `${basePath}cadeau enfant.PNG`];
   const images = product.images?.length > 0 
     ? product.images 
     : [defaultImages[product._id?.charCodeAt(0) % 2 || 0]];

@@ -1,10 +1,12 @@
 import { Link } from 'react-router-dom';
 import { useSettings } from '../context/SettingsContext';
 
+const basePath = import.meta.env.BASE_URL || '/';
+
 const categoryImages = {
-  'bouquet-chocolat': '/bouquet.PNG',
-  'bouquet-parfum': '/cadeau enfant.PNG',
-  'bouquet-tapis-de-priere': '/cadeau enfant.PNG'
+  'bouquet-chocolat': `${basePath}bouquet.PNG`,
+  'bouquet-parfum': `${basePath}cadeau enfant.PNG`,
+  'bouquet-tapis-de-priere': `${basePath}cadeau enfant.PNG`
 };
 
 const CategoryCard = ({ category }) => {
@@ -12,7 +14,7 @@ const CategoryCard = ({ category }) => {
   
   const imageUrl = category.image 
     ? category.image 
-    : categoryImages[category.slug] || '/bouquet.PNG';
+    : categoryImages[category.slug] || `${basePath}bouquet.PNG`;
 
   return (
     <Link 
