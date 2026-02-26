@@ -205,7 +205,6 @@ Les couleurs sont stockées en base de données et appliquées dynamiquement via
 
 ## 👤 Auteur
 
-Développé avec ❤️ pour Boutique Moez
 
 ## 📄 Licence
 
