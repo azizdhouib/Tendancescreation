@@ -1,0 +1,85 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-primary: #9B4D96;
+  --color-secondary: #E85A8B;
+  --color-button: #D4548A;
+  --color-background: #FDF5F8;
+  --color-accent: #F5A623;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  background-color: var(--color-background);
+  color: #333;
+  line-height: 1.6;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Playfair Display', serif;
+}
+
+@layer components {
+  .btn-primary {
+    @apply px-6 py-3 rounded-full font-medium transition-all duration-300 transform hover:scale-105 hover:shadow-lg;
+    background-color: var(--color-button);
+    color: white;
+  }
+
+  .btn-primary:hover {
+    filter: brightness(1.1);
+  }
+
+  .btn-secondary {
+    @apply px-6 py-3 rounded-full font-medium border-2 transition-all duration-300 hover:shadow-md;
+    border-color: var(--color-button);
+    color: var(--color-button);
+  }
+
+  .btn-secondary:hover {
+    background-color: var(--color-button);
+    color: white;
+  }
+
+  .card {
+    @apply bg-white rounded-2xl shadow-md overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1;
+  }
+
+  .input-field {
+    @apply w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:outline-none transition-all duration-300;
+  }
+
+  .input-field:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(232, 180, 184, 0.2);
+  }
+
+  .section-title {
+    @apply text-3xl md:text-4xl font-serif font-semibold text-center mb-8;
+  }
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-background);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-primary);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-button);
+}
