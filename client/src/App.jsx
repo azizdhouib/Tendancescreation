@@ -55,13 +55,16 @@ const App = () => {
         <AuthProvider>
           <CartProvider>
             <Toaster
-              position="top-center"
+              position="bottom-center"
               toastOptions={{
-                duration: 3000,
+                duration: 2000,
                 style: {
                   borderRadius: '12px',
                   padding: '16px',
                 },
+              }}
+              containerStyle={{
+                bottom: 40,
               }}
             />
             <Routes>
