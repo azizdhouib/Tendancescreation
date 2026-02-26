@@ -23,12 +23,16 @@ export const SettingsProvider = ({ children }) => {
   });
   const [loading, setLoading] = useState(true);
 
-  const fetchSettings = async () => {
+  const fetchSettings = async (retries = 3) => {
     try {
       const response = await settingsAPI.get();
       setSettings(response.data);
       applyColors(response.data);
     } catch (error) {
+      if (retries > 0) {
+        setTimeout(() => fetchSettings(retries - 1), 2000);
+        return;
+      }
       console.error('Erreur lors du chargement des paramètres:', error);
     } finally {
       setLoading(false);

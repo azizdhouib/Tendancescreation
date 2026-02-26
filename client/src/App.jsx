@@ -26,7 +26,7 @@ const ProtectedRoute = ({ children }) => {
   const { user, loading, isAdmin } = useAuth();
 
   if (loading) {
-    return <Loading />;
+    return <Loading fullScreen message="Chargement..." />;
   }
 
   if (!user || !isAdmin) {
