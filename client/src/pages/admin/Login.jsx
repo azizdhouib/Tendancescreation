@@ -35,7 +35,7 @@ const Login = () => {
       <div className="max-w-md w-full">
         <div className="text-center mb-8">
           <img 
-            src="/logo.jpg" 
+            src="https://wxynwbuvmxuurbimbpbn.supabase.co/storage/v1/object/public/product-images/logo.jpg" 
             alt="Tendance&Creations"
             className="h-16 w-16 rounded-full object-cover mx-auto mb-4"
           />

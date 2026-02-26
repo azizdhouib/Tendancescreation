@@ -12,7 +12,7 @@ const Footer = () => {
           <div className="col-span-1 md:col-span-2">
             <div className="flex items-center space-x-2 mb-4">
               <img 
-                src="/logo.jpg" 
+                src="https://wxynwbuvmxuurbimbpbn.supabase.co/storage/v1/object/public/product-images/logo.jpg" 
                 alt={settings.siteName}
                 className="h-10 w-10 rounded-full object-cover"
               />

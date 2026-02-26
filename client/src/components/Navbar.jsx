@@ -23,7 +23,7 @@ const Navbar = () => {
         <div className="flex justify-between items-center h-20">
           <Link to="/" className="flex items-center space-x-2">
             <img 
-              src="/logo.jpg" 
+              src="https://wxynwbuvmxuurbimbpbn.supabase.co/storage/v1/object/public/product-images/logo.jpg" 
               alt={settings.siteName}
               className="h-10 w-10 rounded-full object-cover"
             />

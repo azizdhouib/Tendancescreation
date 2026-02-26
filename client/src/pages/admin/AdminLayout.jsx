@@ -65,7 +65,7 @@ const AdminLayout = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <img 
-                src="/logo.jpg" 
+                src="https://wxynwbuvmxuurbimbpbn.supabase.co/storage/v1/object/public/product-images/logo.jpg" 
                 alt="Tendance&Creations"
                 className="h-10 w-10 rounded-full object-cover"
               />
