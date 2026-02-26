@@ -11,29 +11,19 @@ export const useSettings = () => {
   return context;
 };
 
-export const SettingsProvider = ({ children }) => {
-  const [settings, setSettings] = useState({
-    primaryColor: '#9B4D96',
-    secondaryColor: '#E85A8B',
-    buttonColor: '#D4548A',
-    backgroundColor: '#FDF5F8',
-    accentColor: '#F5A623',
-    siteName: 'Tendance&Creations',
-    slogan: 'Des bouquets personnalisés pour des cadeaux uniques'
-  });
-  const [loading, setLoading] = useState(true);
+const defaultSettings = {
+  primaryColor: '#9B4D96',
+  secondaryColor: '#E85A8B',
+  buttonColor: '#D4548A',
+  backgroundColor: '#FDF5F8',
+  accentColor: '#F5A623',
+  siteName: 'Tendance&Creations',
+  slogan: 'Des bouquets personnalisés pour des cadeaux uniques'
+};
 
-  const fetchSettings = async () => {
-    try {
-      const response = await settingsAPI.get();
-      setSettings(response.data);
-      applyColors(response.data);
-    } catch (error) {
-      console.error('Erreur lors du chargement des paramètres:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+export const SettingsProvider = ({ children }) => {
+  const [settings, setSettings] = useState(defaultSettings);
+  const [loading, setLoading] = useState(false);
 
   const applyColors = (colors) => {
     const root = document.documentElement;
@@ -44,19 +34,29 @@ export const SettingsProvider = ({ children }) => {
     root.style.setProperty('--color-accent', colors.accentColor);
   };
 
+  const fetchSettings = async () => {
+    try {
+      const response = await settingsAPI.get();
+      if (response.data) {
+        setSettings(response.data);
+        applyColors(response.data);
+      }
+    } catch (error) {
+      console.error('Erreur lors du chargement des paramètres:', error);
+      applyColors(defaultSettings);
+    }
+  };
+
   useEffect(() => {
+    applyColors(defaultSettings);
     fetchSettings();
   }, []);
 
   const updateSettings = async (newSettings) => {
-    try {
-      const response = await settingsAPI.update(newSettings);
-      setSettings(response.data);
-      applyColors(response.data);
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
+    const response = await settingsAPI.update(newSettings);
+    setSettings(response.data);
+    applyColors(response.data);
+    return response.data;
   };
 
   return (

@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { CartProvider } from './context/CartContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -50,7 +50,7 @@ const PublicLayout = ({ children }) => {
 
 const App = () => {
   return (
-    <BrowserRouter>
+    <HashRouter>
       <SettingsProvider>
         <AuthProvider>
           <CartProvider>
@@ -122,7 +122,7 @@ const App = () => {
           </CartProvider>
         </AuthProvider>
       </SettingsProvider>
-    </BrowserRouter>
+    </HashRouter>
   );
 };
 

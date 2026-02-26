@@ -3,17 +3,8 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
+  base: '/Tendancescreation/',
   server: {
-    port: 3000,
-    proxy: {
-      '/api': {
-        target: 'http://localhost:5000',
-        changeOrigin: true
-      },
-      '/uploads': {
-        target: 'http://localhost:5000',
-        changeOrigin: true
-      }
-    }
+    port: 3000
   }
 })
