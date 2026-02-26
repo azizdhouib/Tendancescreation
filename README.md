@@ -1,4 +1,4 @@
-# Boutique Moez - Site E-commerce de Bouquets Personnalisés
+# Site E-commerce de Bouquets Personnalisés
 
 Un site e-commerce élégant et moderne pour une boutique vendant des bouquets personnalisés composés de chocolat, parfum et tapis de prière musulman.
 
