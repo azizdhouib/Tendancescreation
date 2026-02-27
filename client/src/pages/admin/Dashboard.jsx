@@ -78,16 +78,22 @@ const Dashboard = () => {
   ];
 
   const statusColors = {
+    pending_payment: 'bg-orange-100 text-orange-800',
+    paid: 'bg-green-100 text-green-800',
     pending: 'bg-yellow-100 text-yellow-800',
     confirmed: 'bg-blue-100 text-blue-800',
+    processing: 'bg-indigo-100 text-indigo-800',
     shipped: 'bg-purple-100 text-purple-800',
-    delivered: 'bg-green-100 text-green-800',
+    delivered: 'bg-teal-100 text-teal-800',
     cancelled: 'bg-red-100 text-red-800'
   };
 
   const statusLabels = {
+    pending_payment: 'En attente de paiement',
+    paid: 'Payée',
     pending: 'En attente',
     confirmed: 'Confirmée',
+    processing: 'En préparation',
     shipped: 'Expédiée',
     delivered: 'Livrée',
     cancelled: 'Annulée'
@@ -187,7 +193,7 @@ const Dashboard = () => {
                       </span>
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-500">
-                      {new Date(order.createdAt).toLocaleDateString('fr-FR')}
+                      {order.created_at ? new Date(order.created_at).toLocaleDateString('fr-FR') : '-'}
                     </td>
                   </tr>
                 ))}
