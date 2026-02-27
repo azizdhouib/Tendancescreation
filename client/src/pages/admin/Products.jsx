@@ -429,31 +429,54 @@ const Products = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Images
                 </label>
+                {/* Images existantes */}
                 {formData.images.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mb-3">
-                    {formData.images.map((img, index) => (
-                      <div key={index} className="relative">
-                        <img
-                          src={img}
-                          alt=""
-                          className="w-20 h-20 object-cover rounded-lg"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => removeImage(index)}
-                          className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center"
-                        >
-                          <FiX className="w-4 h-4" />
-                        </button>
-                      </div>
-                    ))}
+                  <div className="mb-3">
+                    <p className="text-xs text-gray-500 mb-2">Images existantes :</p>
+                    <div className="flex flex-wrap gap-2">
+                      {formData.images.map((img, index) => (
+                        <div key={index} className="relative">
+                          <img
+                            src={img}
+                            alt=""
+                            className="w-20 h-20 object-cover rounded-lg border-2 border-gray-200"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => removeImage(index)}
+                            className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center"
+                          >
+                            <FiX className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {/* Preview de la nouvelle image */}
+                {imageFiles.length > 0 && (
+                  <div className="mb-4 flex flex-col items-center">
+                    <p className="text-xs text-gray-500 mb-3">Nouvelle image :</p>
+                    <div className="relative">
+                      <img
+                        src={URL.createObjectURL(imageFiles[0])}
+                        alt={imageFiles[0].name}
+                        className="w-40 h-40 object-cover rounded-xl border-2 border-green-400 shadow-md"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setImageFiles([])}
+                        className="absolute -top-3 -right-3 w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center shadow-md hover:bg-red-600"
+                      >
+                        <FiX className="w-5 h-5" />
+                      </button>
+                    </div>
                   </div>
                 )}
                 <input
                   type="file"
-                  multiple
                   accept="image/*"
-                  onChange={(e) => setImageFiles(Array.from(e.target.files))}
+                  onChange={(e) => e.target.files[0] && setImageFiles([e.target.files[0]])}
                   className="input-field"
                 />
               </div>

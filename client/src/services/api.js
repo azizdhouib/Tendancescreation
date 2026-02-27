@@ -70,12 +70,19 @@ export const productsAPI = {
     const files = formData.getAll('images');
     for (const file of files) {
       if (file && file.size > 0) {
-        const fileName = `${Date.now()}-${file.name}`;
-        const { error: uploadError } = await supabase.storage
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+        
+        const { data: uploadData, error: uploadError } = await supabase.storage
           .from('product-images')
-          .upload(fileName, file);
+          .upload(fileName, file, {
+            cacheControl: '3600',
+            upsert: false
+          });
 
-        if (!uploadError) {
+        if (uploadError) {
+          console.error('Upload error:', uploadError);
+        } else {
           const { data: urlData } = supabase.storage
             .from('product-images')
             .getPublicUrl(fileName);
@@ -175,7 +182,8 @@ export const categoriesAPI = {
   create: async (formData) => {
     const categoryData = {
       name: formData.get('name'),
-      description: formData.get('description') || ''
+      description: formData.get('description') || '',
+      is_active: formData.get('isActive') === 'true'
     };
 
     // Upload image if exists
@@ -208,6 +216,7 @@ export const categoriesAPI = {
     const categoryData = {
       name: formData.get('name'),
       description: formData.get('description') || '',
+      is_active: formData.get('isActive') === 'true',
       updated_at: new Date().toISOString()
     };
 
@@ -355,6 +364,16 @@ export const ordersAPI = {
 
     if (error) throw error;
     return { data };
+  },
+
+  delete: async (id) => {
+    const { error } = await supabase
+      .from('orders')
+      .delete()
+      .eq('id', id);
+
+    if (error) throw error;
+    return { data: { message: 'Commande supprimée' } };
   }
 };
 

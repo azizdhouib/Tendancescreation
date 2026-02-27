@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { FiEye, FiX } from 'react-icons/fi';
+import { FiEye, FiX, FiTrash2 } from 'react-icons/fi';
 import { ordersAPI } from '../../services/api';
 import { useSettings } from '../../context/SettingsContext';
 import Loading from '../../components/Loading';
@@ -39,11 +39,30 @@ const Orders = () => {
     }
   };
 
+  const deleteOrder = async (orderId) => {
+    if (!window.confirm('Êtes-vous sûr de vouloir supprimer cette commande ?')) {
+      return;
+    }
+    try {
+      await ordersAPI.delete(orderId);
+      toast.success('Commande supprimée');
+      fetchOrders();
+      if (selectedOrder?._id === orderId) {
+        setSelectedOrder(null);
+      }
+    } catch (error) {
+      toast.error('Erreur lors de la suppression');
+    }
+  };
+
   const statusOptions = [
+    { value: 'pending_payment', label: 'En attente de paiement', color: 'bg-orange-100 text-orange-800' },
+    { value: 'paid', label: 'Payée', color: 'bg-green-100 text-green-800' },
     { value: 'pending', label: 'En attente', color: 'bg-yellow-100 text-yellow-800' },
     { value: 'confirmed', label: 'Confirmée', color: 'bg-blue-100 text-blue-800' },
+    { value: 'processing', label: 'En préparation', color: 'bg-indigo-100 text-indigo-800' },
     { value: 'shipped', label: 'Expédiée', color: 'bg-purple-100 text-purple-800' },
-    { value: 'delivered', label: 'Livrée', color: 'bg-green-100 text-green-800' },
+    { value: 'delivered', label: 'Livrée', color: 'bg-teal-100 text-teal-800' },
     { value: 'cancelled', label: 'Annulée', color: 'bg-red-100 text-red-800' }
   ];
 
@@ -124,15 +143,25 @@ const Orders = () => {
                       </select>
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-500">
-                      {new Date(order.createdAt).toLocaleDateString('fr-FR')}
+                      {order.created_at ? new Date(order.created_at).toLocaleDateString('fr-FR') : '-'}
                     </td>
                     <td className="px-6 py-4">
-                      <button
-                        onClick={() => setSelectedOrder(order)}
-                        className="p-2 hover:bg-gray-100 rounded-lg text-gray-600"
-                      >
-                        <FiEye className="w-4 h-4" />
-                      </button>
+                      <div className="flex items-center gap-1">
+                        <button
+                          onClick={() => setSelectedOrder(order)}
+                          className="p-2 hover:bg-gray-100 rounded-lg text-gray-600"
+                          title="Voir les détails"
+                        >
+                          <FiEye className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => deleteOrder(order._id)}
+                          className="p-2 hover:bg-red-50 rounded-lg text-red-500"
+                          title="Supprimer"
+                        >
+                          <FiTrash2 className="w-4 h-4" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -218,39 +247,37 @@ const Orders = () => {
               <div>
                 <h3 className="font-medium text-gray-800 mb-3">Articles</h3>
                 <div className="space-y-3">
-                  {selectedOrder.items?.map((item, index) => (
-                    <div key={index} className="flex items-center gap-4 p-3 bg-gray-50 rounded-xl">
-                      <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-200 flex-shrink-0">
-                        {item.image ? (
+                  {selectedOrder.items?.map((item, index) => {
+                    const itemImage = item.image || `https://wxynwbuvmxuurbimbpbn.supabase.co/storage/v1/object/public/product-images/image${(index % 4) + 1}.jfif`;
+                    const itemColor = item.selected_color || item.selectedColor;
+                    return (
+                      <div key={index} className="flex items-center gap-4 p-3 bg-gray-50 rounded-xl">
+                        <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-200 flex-shrink-0">
                           <img
-                            src={item.image}
+                            src={itemImage}
                             alt={item.name}
                             className="w-full h-full object-cover"
                           />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-gray-400">
-                            ?
-                          </div>
-                        )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-gray-800">{item.name}</p>
+                          {itemColor && (
+                            <div className="flex items-center gap-2 mt-1">
+                              <div 
+                                className="w-3 h-3 rounded-full border"
+                                style={{ backgroundColor: itemColor.hex }}
+                              />
+                              <span className="text-xs text-gray-500">{itemColor.name}</span>
+                            </div>
+                          )}
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm text-gray-500">x{item.quantity}</p>
+                          <p className="font-medium text-gray-800">{(item.price * item.quantity).toFixed(2)} €</p>
+                        </div>
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-gray-800">{item.name}</p>
-                        {item.selectedColor && (
-                          <div className="flex items-center gap-2 mt-1">
-                            <div 
-                              className="w-3 h-3 rounded-full border"
-                              style={{ backgroundColor: item.selectedColor.hex }}
-                            />
-                            <span className="text-xs text-gray-500">{item.selectedColor.name}</span>
-                          </div>
-                        )}
-                      </div>
-                      <div className="text-right">
-                        <p className="text-sm text-gray-500">x{item.quantity}</p>
-                        <p className="font-medium text-gray-800">{(item.price * item.quantity).toFixed(2)} €</p>
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
 
@@ -265,6 +292,17 @@ const Orders = () => {
                     {selectedOrder.total?.toFixed(2)} €
                   </span>
                 </div>
+              </div>
+
+              {/* Delete Button */}
+              <div className="border-t pt-4 mt-4">
+                <button
+                  onClick={() => deleteOrder(selectedOrder._id)}
+                  className="w-full py-3 rounded-xl bg-red-50 text-red-600 font-medium hover:bg-red-100 transition-colors flex items-center justify-center gap-2"
+                >
+                  <FiTrash2 className="w-4 h-4" />
+                  Supprimer cette commande
+                </button>
               </div>
             </div>
           </div>

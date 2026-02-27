@@ -28,6 +28,8 @@ const Cart = () => {
     }
   }, [searchParams]);
 
+  const TEST_MODE = true; // Mettre à false pour activer Stripe
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -47,17 +49,26 @@ const Cart = () => {
         customerInfo
       });
 
-      const checkoutData = await ordersAPI.createCheckoutSession({
-        items: orderItems,
-        customerInfo,
-        orderId: orderResponse.data.id
-      });
-
-      if (checkoutData.url) {
+      if (TEST_MODE) {
+        // Mode test : simule le paiement sans Stripe
+        await ordersAPI.confirmPayment(orderResponse.data.id);
         clearCart();
-        window.location.href = checkoutData.url;
+        toast.success('Commande confirmée !');
+        navigate(`/paiement-reussi?order_id=${orderResponse.data.id}`);
       } else {
-        throw new Error('Erreur lors de la création du paiement');
+        // Mode production : utilise Stripe
+        const checkoutData = await ordersAPI.createCheckoutSession({
+          items: orderItems,
+          customerInfo,
+          orderId: orderResponse.data.id
+        });
+
+        if (checkoutData.url) {
+          clearCart();
+          window.location.href = checkoutData.url;
+        } else {
+          throw new Error('Erreur lors de la création du paiement');
+        }
       }
     } catch (error) {
       console.error('Checkout error:', error);

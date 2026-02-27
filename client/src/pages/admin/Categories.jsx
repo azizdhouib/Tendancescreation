@@ -14,7 +14,8 @@ const Categories = () => {
 
   const [formData, setFormData] = useState({
     name: '',
-    description: ''
+    description: '',
+    isActive: true
   });
   const [imageFile, setImageFile] = useState(null);
 
@@ -38,13 +39,15 @@ const Categories = () => {
       setEditingCategory(category);
       setFormData({
         name: category.name,
-        description: category.description || ''
+        description: category.description || '',
+        isActive: category.is_active !== false
       });
     } else {
       setEditingCategory(null);
       setFormData({
         name: '',
-        description: ''
+        description: '',
+        isActive: true
       });
     }
     setImageFile(null);
@@ -62,6 +65,7 @@ const Categories = () => {
     const data = new FormData();
     data.append('name', formData.name);
     data.append('description', formData.description);
+    data.append('isActive', formData.isActive);
     if (imageFile) {
       data.append('image', imageFile);
     }
@@ -134,11 +138,9 @@ const Categories = () => {
                     <FiPlus className="w-8 h-8" />
                   </div>
                 )}
-                {!category.isActive && (
-                  <div className="absolute top-2 right-2 px-2 py-1 bg-red-500 text-white text-xs rounded-full">
-                    Inactive
-                  </div>
-                )}
+                <div className={`absolute top-2 right-2 px-2 py-1 text-white text-xs rounded-full ${category.is_active ? 'bg-green-500' : 'bg-red-500'}`}>
+                  {category.is_active ? 'Active' : 'Inactive'}
+                </div>
               </div>
               <div className="p-4">
                 <h3 className="font-semibold text-gray-800 mb-1">{category.name}</h3>
@@ -216,6 +218,25 @@ const Categories = () => {
                   onChange={(e) => setImageFile(e.target.files[0])}
                   className="input-field"
                 />
+              </div>
+
+              <div>
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <div 
+                    className={`relative w-12 h-6 rounded-full transition-colors ${formData.isActive ? 'bg-green-500' : 'bg-gray-300'}`}
+                    onClick={() => setFormData({...formData, isActive: !formData.isActive})}
+                  >
+                    <div 
+                      className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${formData.isActive ? 'translate-x-7' : 'translate-x-1'}`}
+                    />
+                  </div>
+                  <span className="text-sm font-medium text-gray-700">
+                    {formData.isActive ? 'Catégorie active' : 'Catégorie inactive'}
+                  </span>
+                </label>
+                <p className="text-xs text-gray-500 mt-1">
+                  Les catégories inactives ne sont pas visibles sur le site
+                </p>
               </div>
 
               <div className="flex gap-3 pt-4">
