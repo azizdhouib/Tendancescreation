@@ -268,7 +268,8 @@ export const ordersAPI = {
       customer_address: customerInfo.address,
       customer_city: customerInfo.city || '',
       customer_notes: customerInfo.notes || '',
-      total: items.reduce((sum, item) => sum + item.price * item.quantity, 0)
+      total: items.reduce((sum, item) => sum + item.price * item.quantity, 0),
+      status: 'pending_payment'
     };
 
     const { data, error } = await supabase
@@ -279,15 +280,45 @@ export const ordersAPI = {
 
     if (error) throw error;
 
-    // Update stock
-    for (const item of items) {
-      await supabase.rpc('decrement_stock', { 
-        product_id: item.productId, 
-        quantity: item.quantity 
-      });
+    return { data: { ...data, orderNumber: data.order_number } };
+  },
+
+  createCheckoutSession: async (orderData) => {
+    const { items, customerInfo, orderId } = orderData;
+
+    const { data, error } = await supabase.functions.invoke('create-checkout', {
+      body: { items, customerInfo, orderId }
+    });
+
+    if (error) throw error;
+    return data;
+  },
+
+  confirmPayment: async (orderId) => {
+    const { data, error } = await supabase
+      .from('orders')
+      .update({ 
+        status: 'paid', 
+        paid_at: new Date().toISOString(),
+        updated_at: new Date().toISOString() 
+      })
+      .eq('id', orderId)
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    // Update stock after payment confirmed
+    if (data.items) {
+      for (const item of data.items) {
+        await supabase.rpc('decrement_stock', { 
+          product_id: item.product_id, 
+          quantity: item.quantity 
+        });
+      }
     }
 
-    return { data: { ...data, orderNumber: data.order_number } };
+    return { data };
   },
 
   getAll: async () => {

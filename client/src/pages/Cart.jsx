@@ -1,6 +1,6 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { FiMinus, FiPlus, FiTrash2, FiShoppingBag, FiArrowRight } from 'react-icons/fi';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { FiMinus, FiPlus, FiTrash2, FiShoppingBag, FiArrowRight, FiCreditCard } from 'react-icons/fi';
 import { useCart } from '../context/CartContext';
 import { useSettings } from '../context/SettingsContext';
 import { ordersAPI } from '../services/api';
@@ -10,6 +10,7 @@ const Cart = () => {
   const { items, updateQuantity, removeItem, clearCart, total } = useCart();
   const { settings } = useSettings();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [showCheckout, setShowCheckout] = useState(false);
   const [loading, setLoading] = useState(false);
   const [customerInfo, setCustomerInfo] = useState({
@@ -21,26 +22,46 @@ const Cart = () => {
     notes: ''
   });
 
+  useEffect(() => {
+    if (searchParams.get('cancelled') === 'true') {
+      toast.error('Paiement annulé');
+    }
+  }, [searchParams]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      const orderData = {
-        items: items.map(item => ({
-          productId: item.productId,
-          quantity: item.quantity,
-          selectedColor: item.selectedColor
-        })),
-        customerInfo
-      };
+      const orderItems = items.map(item => ({
+        productId: item.productId,
+        name: item.name,
+        price: item.price,
+        quantity: item.quantity,
+        selectedColor: item.selectedColor,
+        image: item.image
+      }));
 
-      const response = await ordersAPI.create(orderData);
-      clearCart();
-      toast.success('Commande envoyée avec succès!');
-      navigate(`/commande-confirmee?order=${response.data.orderNumber}`);
+      const orderResponse = await ordersAPI.create({
+        items: orderItems,
+        customerInfo
+      });
+
+      const checkoutData = await ordersAPI.createCheckoutSession({
+        items: orderItems,
+        customerInfo,
+        orderId: orderResponse.data.id
+      });
+
+      if (checkoutData.url) {
+        clearCart();
+        window.location.href = checkoutData.url;
+      } else {
+        throw new Error('Erreur lors de la création du paiement');
+      }
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Erreur lors de la commande');
+      console.error('Checkout error:', error);
+      toast.error(error.message || 'Erreur lors de la commande');
     } finally {
       setLoading(false);
     }
@@ -233,11 +254,15 @@ const Cart = () => {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="w-full py-4 rounded-full text-white font-medium transition-all hover:shadow-lg disabled:opacity-70"
+                    className="w-full flex items-center justify-center gap-2 py-4 rounded-full text-white font-medium transition-all hover:shadow-lg disabled:opacity-70"
                     style={{ backgroundColor: settings.buttonColor }}
                   >
-                    {loading ? 'Envoi en cours...' : 'Confirmer la commande'}
+                    <FiCreditCard className="w-5 h-5" />
+                    {loading ? 'Redirection vers le paiement...' : 'Payer par carte'}
                   </button>
+                  <p className="text-xs text-center text-gray-500">
+                    Paiement sécurisé par Stripe
+                  </p>
                   <button
                     type="button"
                     onClick={() => setShowCheckout(false)}

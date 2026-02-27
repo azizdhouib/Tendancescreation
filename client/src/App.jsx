@@ -13,6 +13,7 @@ import Shop from './pages/Shop';
 import Product from './pages/Product';
 import Cart from './pages/Cart';
 import OrderConfirmed from './pages/OrderConfirmed';
+import PaymentSuccess from './pages/PaymentSuccess';
 
 import Login from './pages/admin/Login';
 import AdminLayout from './pages/admin/AdminLayout';
@@ -92,6 +93,11 @@ const App = () => {
               <Route path="/commande-confirmee" element={
                 <PublicLayout>
                   <OrderConfirmed />
+                </PublicLayout>
+              } />
+              <Route path="/paiement-reussi" element={
+                <PublicLayout>
+                  <PaymentSuccess />
                 </PublicLayout>
               } />
 
