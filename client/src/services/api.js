@@ -1,5 +1,28 @@
 import { supabase } from '../lib/supabase';
 
+function parseBouquetOptions(formData) {
+  const raw = formData.get('bouquet_options');
+  if (raw == null || raw === '' || raw === 'null') return null;
+  try {
+    const parsed = JSON.parse(raw);
+    if (parsed && typeof parsed === 'object') return parsed;
+  } catch {
+    /* ignore */
+  }
+  return null;
+}
+
+function normalizeProduct(p) {
+  if (!p) return null;
+  return {
+    ...p,
+    _id: p.id,
+    category: p.categories,
+    isFeatured: p.is_featured,
+    bouquetOptions: p.bouquet_options || null,
+  };
+}
+
 // Products API
 export const productsAPI = {
   getAll: async (params = {}) => {
@@ -24,11 +47,7 @@ export const productsAPI = {
     const { data, error } = await query;
     if (error) throw error;
     
-    const products = data.map(p => ({
-      ...p,
-      _id: p.id,
-      category: p.categories
-    }));
+    const products = data.map(normalizeProduct);
 
     return { data: { products, pagination: { page: 1, pages: 1, total: products.length } } };
   },
@@ -41,7 +60,7 @@ export const productsAPI = {
       .single();
 
     if (error) throw error;
-    return { data: { ...data, _id: data.id, category: data.categories } };
+    return { data: normalizeProduct(data) };
   },
 
   getAllAdmin: async () => {
@@ -51,7 +70,7 @@ export const productsAPI = {
       .order('created_at', { ascending: false });
 
     if (error) throw error;
-    return { data: data.map(p => ({ ...p, _id: p.id, category: p.categories })) };
+    return { data: data.map(normalizeProduct) };
   },
 
   create: async (formData) => {
@@ -63,6 +82,7 @@ export const productsAPI = {
       stock: parseInt(formData.get('stock')) || 0,
       is_featured: formData.get('isFeatured') === 'true',
       colors: JSON.parse(formData.get('colors') || '[]'),
+      bouquet_options: parseBouquetOptions(formData),
       images: []
     };
 
@@ -98,7 +118,7 @@ export const productsAPI = {
       .single();
 
     if (error) throw error;
-    return { data: { ...data, _id: data.id, category: data.categories } };
+    return { data: normalizeProduct(data) };
   },
 
   update: async (id, formData) => {
@@ -112,6 +132,7 @@ export const productsAPI = {
       stock: parseInt(formData.get('stock')) || 0,
       is_featured: formData.get('isFeatured') === 'true',
       colors: JSON.parse(formData.get('colors') || '[]'),
+      bouquet_options: parseBouquetOptions(formData),
       images: existingImages,
       updated_at: new Date().toISOString()
     };
@@ -142,7 +163,7 @@ export const productsAPI = {
       .single();
 
     if (error) throw error;
-    return { data: { ...data, _id: data.id, category: data.categories } };
+    return { data: normalizeProduct(data) };
   },
 
   delete: async (id) => {
@@ -269,6 +290,7 @@ export const ordersAPI = {
         price: item.price,
         quantity: item.quantity,
         selected_color: item.selectedColor,
+        custom_bouquet: item.customBouquet || null,
         image: item.image
       })),
       customer_name: customerInfo.name,

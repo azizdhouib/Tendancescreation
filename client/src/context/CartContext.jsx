@@ -2,6 +2,12 @@ import { createContext, useContext, useState, useEffect } from 'react';
 
 const CartContext = createContext();
 
+function sameCustomBouquet(a, b) {
+  if (!a && !b) return true;
+  if (!a || !b) return false;
+  return a.bouquet === b.bouquet && a.chocolat === b.chocolat && a.parfum === b.parfum;
+}
+
 export const useCart = () => {
   const context = useContext(CartContext);
   if (!context) {
@@ -20,11 +26,13 @@ export const CartProvider = ({ children }) => {
     localStorage.setItem('cart', JSON.stringify(items));
   }, [items]);
 
-  const addItem = (product, quantity = 1, selectedColor = null) => {
+  const addItem = (product, quantity = 1, selectedColor = null, customBouquet = null) => {
     setItems(prev => {
       const existingIndex = prev.findIndex(
-        item => item.productId === product._id && 
-        item.selectedColor?.hex === selectedColor?.hex
+        item =>
+          item.productId === product._id &&
+          item.selectedColor?.hex === selectedColor?.hex &&
+          sameCustomBouquet(item.customBouquet, customBouquet)
       );
 
       if (existingIndex > -1) {
@@ -40,22 +48,31 @@ export const CartProvider = ({ children }) => {
         image: product.images?.[0] || '',
         quantity,
         selectedColor,
+        customBouquet,
         stock: product.stock
       }];
     });
   };
 
-  const removeItem = (productId, colorHex) => {
+  const removeItem = (productId, selectedColorHex, customBouquet = null) => {
     setItems(prev => prev.filter(
-      item => !(item.productId === productId && item.selectedColor?.hex === colorHex)
+      item => !(
+        item.productId === productId &&
+        item.selectedColor?.hex === selectedColorHex &&
+        sameCustomBouquet(item.customBouquet, customBouquet)
+      )
     ));
   };
 
-  const updateQuantity = (productId, colorHex, quantity) => {
+  const updateQuantity = (productId, selectedColorHex, quantity, customBouquet = null) => {
     if (quantity < 1) return;
     
     setItems(prev => prev.map(item => {
-      if (item.productId === productId && item.selectedColor?.hex === colorHex) {
+      if (
+        item.productId === productId &&
+        item.selectedColor?.hex === selectedColorHex &&
+        sameCustomBouquet(item.customBouquet, customBouquet)
+      ) {
         return { ...item, quantity: Math.min(quantity, item.stock || 99) };
       }
       return item;

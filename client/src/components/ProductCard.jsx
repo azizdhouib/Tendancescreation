@@ -8,12 +8,21 @@ const ProductCard = ({ product }) => {
   const { addItem } = useCart();
   const { settings } = useSettings();
 
+  const hasComposition =
+    product.bouquetOptions &&
+    (product.bouquetOptions.bouquet?.length > 0 ||
+      product.bouquetOptions.chocolat?.length > 0 ||
+      product.bouquetOptions.parfum?.length > 0);
+
   const handleAddToCart = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    
+    if (hasComposition) {
+      toast('Personnalisez ce bouquet sur la fiche produit', { icon: '✨' });
+      return;
+    }
     const defaultColor = product.colors?.[0] || null;
-    addItem(product, 1, defaultColor);
+    addItem(product, 1, defaultColor, null);
     toast.success(`${product.name} ajouté au panier`);
   };
 
@@ -32,7 +41,7 @@ const ProductCard = ({ product }) => {
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
         />
         
-        {product.isFeatured && (
+        {(product.isFeatured || product.is_featured) && (
           <div 
             className="absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-medium text-white"
             style={{ backgroundColor: settings.accentColor }}
@@ -59,7 +68,7 @@ const ProductCard = ({ product }) => {
             <FiEye className="w-4 h-4" />
             Voir
           </Link>
-          {product.stock > 0 && (
+          {product.stock > 0 && !hasComposition && (
             <button
               onClick={handleAddToCart}
               className="flex-1 flex items-center justify-center gap-2 py-2 rounded-full text-sm font-medium text-white transition-colors hover:opacity-90"

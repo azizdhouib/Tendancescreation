@@ -21,6 +21,7 @@ CREATE TABLE products (
   category_id UUID REFERENCES categories(id) ON DELETE SET NULL,
   images TEXT[] DEFAULT '{}',
   colors JSONB DEFAULT '[]',
+  bouquet_options JSONB DEFAULT NULL,
   stock INTEGER DEFAULT 0,
   is_featured BOOLEAN DEFAULT false,
   is_active BOOLEAN DEFAULT true,
@@ -117,7 +118,8 @@ VALUES ('#9B4D96', '#E85A8B', '#D4548A', '#FDF5F8', '#F5A623', 'Tendance&Creatio
 INSERT INTO categories (name, description) VALUES
   ('Bouquet Chocolat', 'Bouquets gourmands composés de délicieux chocolats artisanaux'),
   ('Bouquet Parfum', 'Bouquets élégants avec parfums de luxe'),
-  ('Bouquet Tapis de Prière', 'Bouquets spirituels avec tapis de prière musulman');
+  ('Bouquet Tapis de Prière', 'Bouquets spirituels avec tapis de prière musulman'),
+  ('Composer son bouquet', 'Choisissez le type de bouquet, de chocolat et de parfum');
 
 -- Insérer les produits (on récupère les IDs des catégories)
 DO $$
@@ -125,16 +127,19 @@ DECLARE
   cat_chocolat UUID;
   cat_parfum UUID;
   cat_tapis UUID;
+  cat_composer UUID;
 BEGIN
   SELECT id INTO cat_chocolat FROM categories WHERE name = 'Bouquet Chocolat';
   SELECT id INTO cat_parfum FROM categories WHERE name = 'Bouquet Parfum';
   SELECT id INTO cat_tapis FROM categories WHERE name = 'Bouquet Tapis de Prière';
+  SELECT id INTO cat_composer FROM categories WHERE name = 'Composer son bouquet';
 
-  INSERT INTO products (name, description, price, category_id, colors, stock, is_featured) VALUES
-    ('Bouquet Douceur Chocolatée', 'Un magnifique bouquet composé de chocolats fins belges, enveloppé dans du papier kraft et orné de rubans satinés.', 89.99, cat_chocolat, '[{"name": "Rose Poudré", "hex": "#E8B4B8"}, {"name": "Beige Doré", "hex": "#D4A574"}]', 15, true),
-    ('Bouquet Prestige Cacao', 'Une création d''exception avec une sélection de chocolats noirs et au lait premium.', 129.99, cat_chocolat, '[{"name": "Or", "hex": "#C9A87C"}, {"name": "Champagne", "hex": "#F7E7CE"}]', 10, true),
-    ('Bouquet Senteur Royale', 'Un bouquet élégant contenant un parfum de créateur accompagné de fleurs séchées.', 159.99, cat_parfum, '[{"name": "Rose Ancien", "hex": "#C4A4A4"}, {"name": "Doré", "hex": "#D4AF37"}]', 8, true),
-    ('Bouquet Parfum Oriental', 'Une composition raffinée avec un parfum aux notes orientales.', 189.99, cat_parfum, '[{"name": "Bordeaux", "hex": "#722F37"}, {"name": "Or Rose", "hex": "#B76E79"}]', 5, false),
-    ('Bouquet Spirituel', 'Un bouquet unique combinant un tapis de prière de qualité supérieure.', 119.99, cat_tapis, '[{"name": "Vert Émeraude", "hex": "#50C878"}, {"name": "Blanc Nacré", "hex": "#FDEEF4"}]', 12, true),
-    ('Bouquet Bénédiction', 'Une création spéciale avec tapis de prière brodé, chapelet et dates premium.', 149.99, cat_tapis, '[{"name": "Turquoise", "hex": "#40E0D0"}, {"name": "Ivoire", "hex": "#FFFFF0"}]', 7, false);
+  INSERT INTO products (name, description, price, category_id, colors, bouquet_options, stock, is_featured) VALUES
+    ('Bouquet Douceur Chocolatée', 'Un magnifique bouquet composé de chocolats fins belges, enveloppé dans du papier kraft et orné de rubans satinés.', 89.99, cat_chocolat, '[{"name": "Rose Poudré", "hex": "#E8B4B8"}, {"name": "Beige Doré", "hex": "#D4A574"}]', NULL, 15, true),
+    ('Bouquet Prestige Cacao', 'Une création d''exception avec une sélection de chocolats noirs et au lait premium.', 129.99, cat_chocolat, '[{"name": "Or", "hex": "#C9A87C"}, {"name": "Champagne", "hex": "#F7E7CE"}]', NULL, 10, true),
+    ('Bouquet Senteur Royale', 'Un bouquet élégant contenant un parfum de créateur accompagné de fleurs séchées.', 159.99, cat_parfum, '[{"name": "Rose Ancien", "hex": "#C4A4A4"}, {"name": "Doré", "hex": "#D4AF37"}]', NULL, 8, true),
+    ('Bouquet Parfum Oriental', 'Une composition raffinée avec un parfum aux notes orientales.', 189.99, cat_parfum, '[{"name": "Bordeaux", "hex": "#722F37"}, {"name": "Or Rose", "hex": "#B76E79"}]', NULL, 5, false),
+    ('Bouquet Spirituel', 'Un bouquet unique combinant un tapis de prière de qualité supérieure.', 119.99, cat_tapis, '[{"name": "Vert Émeraude", "hex": "#50C878"}, {"name": "Blanc Nacré", "hex": "#FDEEF4"}]', NULL, 12, true),
+    ('Bouquet Bénédiction', 'Une création spéciale avec tapis de prière brodé, chapelet et dates premium.', 149.99, cat_tapis, '[{"name": "Turquoise", "hex": "#40E0D0"}, {"name": "Ivoire", "hex": "#FFFFF0"}]', NULL, 7, false),
+    ('Mon bouquet sur mesure', 'Composez votre bouquet : choisissez le style floral, le type de chocolat et la famille olfactive du parfum.', 99.99, cat_composer, '[]', '{"bouquet": ["Roses rouges", "Roses blanches", "Tulipes", "Mixte saisonnier"], "chocolat": ["Chocolat au lait", "Chocolat noir", "Praliné", "Sans chocolat"], "parfum": ["Floral", "Boisé / musqué", "Oriental", "Frais / agrumes"]}', 30, true);
 END $$;

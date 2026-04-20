@@ -14,6 +14,7 @@ const Product = () => {
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedColor, setSelectedColor] = useState(null);
   const [quantity, setQuantity] = useState(1);
+  const [composition, setComposition] = useState({ bouquet: '', chocolat: '', parfum: '' });
   const { addItem } = useCart();
   const { settings } = useSettings();
 
@@ -24,6 +25,16 @@ const Product = () => {
         setProduct(response.data);
         if (response.data.colors?.length > 0) {
           setSelectedColor(response.data.colors[0]);
+        }
+        const bo = response.data.bouquetOptions;
+        if (bo) {
+          setComposition({
+            bouquet: bo.bouquet?.[0] || '',
+            chocolat: bo.chocolat?.[0] || '',
+            parfum: bo.parfum?.[0] || ''
+          });
+        } else {
+          setComposition({ bouquet: '', chocolat: '', parfum: '' });
         }
       } catch (error) {
         console.error('Erreur:', error);
@@ -36,12 +47,37 @@ const Product = () => {
     fetchProduct();
   }, [id]);
 
+  const bouquetOpts = product?.bouquetOptions;
+  const needsBouquet = bouquetOpts?.bouquet?.length > 0;
+  const needsChocolat = bouquetOpts?.chocolat?.length > 0;
+  const needsParfum = bouquetOpts?.parfum?.length > 0;
+
   const handleAddToCart = () => {
     if (product.stock === 0) {
       toast.error('Ce produit est en rupture de stock');
       return;
     }
-    addItem(product, quantity, selectedColor);
+    if (needsBouquet && !composition.bouquet) {
+      toast.error('Choisissez un type de bouquet');
+      return;
+    }
+    if (needsChocolat && !composition.chocolat) {
+      toast.error('Choisissez un type de chocolat');
+      return;
+    }
+    if (needsParfum && !composition.parfum) {
+      toast.error('Choisissez un type de parfum');
+      return;
+    }
+    const customBouquet =
+      needsBouquet || needsChocolat || needsParfum
+        ? {
+            bouquet: composition.bouquet || null,
+            chocolat: composition.chocolat || null,
+            parfum: composition.parfum || null
+          }
+        : null;
+    addItem(product, quantity, selectedColor, customBouquet);
     toast.success(`${product.name} ajouté au panier`);
   };
 
@@ -156,6 +192,61 @@ const Product = () => {
             <p className="text-gray-600 leading-relaxed mb-8">
               {product.description}
             </p>
+
+            {/* Composition bouquet (catégorie composer) */}
+            {(needsBouquet || needsChocolat || needsParfum) && (
+              <div className="mb-8 space-y-4">
+                <h3 className="font-medium text-gray-800">Composez votre bouquet</h3>
+                {needsBouquet && (
+                  <div>
+                    <label className="block text-sm text-gray-600 mb-2">Type de bouquet</label>
+                    <select
+                      value={composition.bouquet}
+                      onChange={(e) => setComposition({ ...composition, bouquet: e.target.value })}
+                      className="input-field w-full"
+                      required
+                    >
+                      <option value="">Choisir…</option>
+                      {bouquetOpts.bouquet.map((opt) => (
+                        <option key={opt} value={opt}>{opt}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+                {needsChocolat && (
+                  <div>
+                    <label className="block text-sm text-gray-600 mb-2">Type de chocolat</label>
+                    <select
+                      value={composition.chocolat}
+                      onChange={(e) => setComposition({ ...composition, chocolat: e.target.value })}
+                      className="input-field w-full"
+                      required
+                    >
+                      <option value="">Choisir…</option>
+                      {bouquetOpts.chocolat.map((opt) => (
+                        <option key={opt} value={opt}>{opt}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+                {needsParfum && (
+                  <div>
+                    <label className="block text-sm text-gray-600 mb-2">Type de parfum</label>
+                    <select
+                      value={composition.parfum}
+                      onChange={(e) => setComposition({ ...composition, parfum: e.target.value })}
+                      className="input-field w-full"
+                      required
+                    >
+                      <option value="">Choisir…</option>
+                      {bouquetOpts.parfum.map((opt) => (
+                        <option key={opt} value={opt}>{opt}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Color Selection */}
             {product.colors?.length > 0 && (

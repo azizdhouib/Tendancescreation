@@ -5,6 +5,9 @@ import { useSettings } from '../../context/SettingsContext';
 import Loading from '../../components/Loading';
 import toast from 'react-hot-toast';
 
+/** Nom exact de la catégorie dans la base — les champs de composition s’affichent pour cette catégorie. */
+const COMPOSER_CATEGORY_NAME = 'Composer son bouquet';
+
 const Products = () => {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -21,7 +24,10 @@ const Products = () => {
     stock: '',
     isFeatured: false,
     colors: [],
-    images: []
+    images: [],
+    bouquetLines: '',
+    chocolatLines: '',
+    parfumLines: ''
   });
   const [imageFiles, setImageFiles] = useState([]);
   const [newColor, setNewColor] = useState({ name: '', hex: '#E8B4B8' });
@@ -54,9 +60,12 @@ const Products = () => {
         price: product.price.toString(),
         category: product.category?._id || '',
         stock: product.stock.toString(),
-        isFeatured: product.isFeatured,
+        isFeatured: product.isFeatured ?? product.is_featured,
         colors: product.colors || [],
-        images: product.images || []
+        images: product.images || [],
+        bouquetLines: (product.bouquetOptions?.bouquet || []).join('\n'),
+        chocolatLines: (product.bouquetOptions?.chocolat || []).join('\n'),
+        parfumLines: (product.bouquetOptions?.parfum || []).join('\n')
       });
     } else {
       setEditingProduct(null);
@@ -68,7 +77,10 @@ const Products = () => {
         stock: '10',
         isFeatured: false,
         colors: [],
-        images: []
+        images: [],
+        bouquetLines: '',
+        chocolatLines: '',
+        parfumLines: ''
       });
     }
     setImageFiles([]);
@@ -82,6 +94,19 @@ const Products = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    const selectedCategory = categories.find(c => c._id === formData.category);
+    const isComposerCategory = selectedCategory?.name === COMPOSER_CATEGORY_NAME;
+
+    if (isComposerCategory) {
+      const bouquet = formData.bouquetLines.split('\n').map(s => s.trim()).filter(Boolean);
+      const chocolat = formData.chocolatLines.split('\n').map(s => s.trim()).filter(Boolean);
+      const parfum = formData.parfumLines.split('\n').map(s => s.trim()).filter(Boolean);
+      if (bouquet.length === 0 || chocolat.length === 0 || parfum.length === 0) {
+        toast.error('Ajoutez au moins une option par ligne pour le bouquet, le chocolat et le parfum.');
+        return;
+      }
+    }
     
     const data = new FormData();
     data.append('name', formData.name);
@@ -91,6 +116,15 @@ const Products = () => {
     data.append('stock', formData.stock);
     data.append('isFeatured', formData.isFeatured);
     data.append('colors', JSON.stringify(formData.colors));
+
+    if (isComposerCategory) {
+      const bouquet = formData.bouquetLines.split('\n').map(s => s.trim()).filter(Boolean);
+      const chocolat = formData.chocolatLines.split('\n').map(s => s.trim()).filter(Boolean);
+      const parfum = formData.parfumLines.split('\n').map(s => s.trim()).filter(Boolean);
+      data.append('bouquet_options', JSON.stringify({ bouquet, chocolat, parfum }));
+    } else {
+      data.append('bouquet_options', 'null');
+    }
     
     if (editingProduct) {
       data.append('existingImages', JSON.stringify(formData.images));
@@ -223,7 +257,7 @@ const Products = () => {
                         <div>
                           <p className="font-medium text-gray-800 flex items-center gap-2">
                             {product.name}
-                            {product.isFeatured && (
+                            {(product.isFeatured ?? product.is_featured) && (
                               <FiStar className="w-4 h-4 text-yellow-500 fill-current" />
                             )}
                           </p>
@@ -358,7 +392,72 @@ const Products = () => {
                     <option key={cat._id} value={cat._id}>{cat.name}</option>
                   ))}
                 </select>
+                <p className="text-xs text-gray-500 mt-2 leading-relaxed">
+                  Pour <strong>modifier les noms</strong> des types de bouquet, de chocolat et de parfum visibles sur la fiche produit,
+                  choisissez la catégorie « <strong>{COMPOSER_CATEGORY_NAME}</strong> » : les trois listes s’affichent juste en dessous.
+                  Une ligne = un choix dans le menu déroulant côté client.
+                </p>
+                {editingProduct?.bouquetOptions &&
+                  categories.find((c) => c._id === formData.category)?.name !== COMPOSER_CATEGORY_NAME && (
+                    <p className="text-xs text-amber-900 bg-amber-50 border border-amber-200 rounded-lg p-3 mt-3">
+                      Ce produit a déjà des options bouquet / chocolat / parfum. Pour les modifier, sélectionnez la catégorie «{' '}
+                      {COMPOSER_CATEGORY_NAME} » ci-dessus.
+                    </p>
+                  )}
               </div>
+
+              {categories.find(c => c._id === formData.category)?.name === COMPOSER_CATEGORY_NAME && (
+                <div className="rounded-xl border-2 border-dashed p-5 space-y-5 bg-rose-50/50 border-rose-200">
+                  <div>
+                    <h3 className="text-base font-semibold text-gray-900">
+                      Modifier les options des menus (client)
+                    </h3>
+                    <p className="text-sm text-gray-600 mt-1">
+                      Éditez le texte sur chaque ligne : ajoutez une ligne pour un nouveau choix, supprimez une ligne pour retirer un choix.
+                      Enregistrez le produit pour appliquer les changements.
+                    </p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-800 mb-1">
+                      Noms des types de bouquet
+                    </label>
+                    <p className="text-xs text-gray-500 mb-2">Chaque ligne apparaît dans le menu « Type de bouquet ».</p>
+                    <textarea
+                      rows={5}
+                      value={formData.bouquetLines}
+                      onChange={(e) => setFormData({ ...formData, bouquetLines: e.target.value })}
+                      className="input-field resize-y font-mono text-sm"
+                      placeholder={'Roses rouges\nTulipes\nMixte saisonnier'}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-800 mb-1">
+                      Noms des types de chocolat
+                    </label>
+                    <p className="text-xs text-gray-500 mb-2">Chaque ligne apparaît dans le menu « Type de chocolat ».</p>
+                    <textarea
+                      rows={5}
+                      value={formData.chocolatLines}
+                      onChange={(e) => setFormData({ ...formData, chocolatLines: e.target.value })}
+                      className="input-field resize-y font-mono text-sm"
+                      placeholder={'Chocolat au lait\nChocolat noir\nSans chocolat'}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-800 mb-1">
+                      Noms des types de parfum
+                    </label>
+                    <p className="text-xs text-gray-500 mb-2">Chaque ligne apparaît dans le menu « Type de parfum ».</p>
+                    <textarea
+                      rows={5}
+                      value={formData.parfumLines}
+                      onChange={(e) => setFormData({ ...formData, parfumLines: e.target.value })}
+                      className="input-field resize-y font-mono text-sm"
+                      placeholder={'Floral\nOriental\nFrais / agrumes'}
+                    />
+                  </div>
+                </div>
+              )}
 
               <div>
                 <label className="flex items-center gap-2 cursor-pointer">

@@ -250,6 +250,7 @@ const Orders = () => {
                   {selectedOrder.items?.map((item, index) => {
                     const itemImage = item.image || `https://wxynwbuvmxuurbimbpbn.supabase.co/storage/v1/object/public/product-images/image${(index % 4) + 1}.jfif`;
                     const itemColor = item.selected_color || item.selectedColor;
+                    const comp = item.custom_bouquet || item.customBouquet;
                     return (
                       <div key={index} className="flex items-center gap-4 p-3 bg-gray-50 rounded-xl">
                         <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-200 flex-shrink-0">
@@ -269,6 +270,13 @@ const Orders = () => {
                               />
                               <span className="text-xs text-gray-500">{itemColor.name}</span>
                             </div>
+                          )}
+                          {comp && (
+                            <ul className="text-xs text-gray-600 mt-2 space-y-0.5">
+                              {comp.bouquet && <li>Bouquet : {comp.bouquet}</li>}
+                              {comp.chocolat && <li>Chocolat : {comp.chocolat}</li>}
+                              {comp.parfum && <li>Parfum : {comp.parfum}</li>}
+                            </ul>
                           )}
                         </div>
                         <div className="text-right">

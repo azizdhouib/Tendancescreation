@@ -41,6 +41,7 @@ const Cart = () => {
         price: item.price,
         quantity: item.quantity,
         selectedColor: item.selectedColor,
+        customBouquet: item.customBouquet,
         image: item.image
       }));
 
@@ -114,7 +115,7 @@ const Cart = () => {
           <div className="lg:col-span-2 space-y-4">
             {items.map((item) => (
               <div 
-                key={`${item.productId}-${item.selectedColor?.hex}`}
+                key={`${item.productId}-${item.selectedColor?.hex ?? ''}-${item.customBouquet ? JSON.stringify(item.customBouquet) : ''}`}
                 className="bg-white rounded-2xl p-4 sm:p-6 shadow-sm"
               >
                 <div className="flex gap-4">
@@ -140,6 +141,19 @@ const Cart = () => {
                         </span>
                       </div>
                     )}
+                    {item.customBouquet && (
+                      <ul className="text-sm text-gray-600 space-y-0.5 mb-2">
+                        {item.customBouquet.bouquet && (
+                          <li>Bouquet : {item.customBouquet.bouquet}</li>
+                        )}
+                        {item.customBouquet.chocolat && (
+                          <li>Chocolat : {item.customBouquet.chocolat}</li>
+                        )}
+                        {item.customBouquet.parfum && (
+                          <li>Parfum : {item.customBouquet.parfum}</li>
+                        )}
+                      </ul>
+                    )}
                     <p 
                       className="font-semibold text-lg"
                       style={{ color: settings.buttonColor }}
@@ -150,7 +164,7 @@ const Cart = () => {
                     <div className="flex items-center justify-between mt-4">
                       <div className="inline-flex items-center bg-gray-100 rounded-full">
                         <button
-                          onClick={() => updateQuantity(item.productId, item.selectedColor?.hex, item.quantity - 1)}
+                          onClick={() => updateQuantity(item.productId, item.selectedColor?.hex, item.quantity - 1, item.customBouquet)}
                           disabled={item.quantity <= 1}
                           className="p-2 hover:bg-gray-200 rounded-l-full disabled:opacity-50"
                         >
@@ -160,14 +174,14 @@ const Cart = () => {
                           {item.quantity}
                         </span>
                         <button
-                          onClick={() => updateQuantity(item.productId, item.selectedColor?.hex, item.quantity + 1)}
+                          onClick={() => updateQuantity(item.productId, item.selectedColor?.hex, item.quantity + 1, item.customBouquet)}
                           className="p-2 hover:bg-gray-200 rounded-r-full"
                         >
                           <FiPlus className="w-4 h-4" />
                         </button>
                       </div>
                       <button
-                        onClick={() => removeItem(item.productId, item.selectedColor?.hex)}
+                        onClick={() => removeItem(item.productId, item.selectedColor?.hex, item.customBouquet)}
                         className="p-2 text-red-500 hover:bg-red-50 rounded-full"
                       >
                         <FiTrash2 className="w-5 h-5" />

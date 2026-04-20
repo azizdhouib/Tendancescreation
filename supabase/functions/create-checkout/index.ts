@@ -19,18 +19,27 @@ serve(async (req) => {
   try {
     const { items, customerInfo, orderId } = await req.json();
 
-    const lineItems = items.map((item: any) => ({
-      price_data: {
-        currency: "eur",
-        product_data: {
-          name: item.name,
-          description: item.selectedColor ? `Couleur: ${item.selectedColor.name}` : undefined,
-          images: item.image ? [item.image] : undefined,
+    const lineItems = items.map((item: any) => {
+      const parts: string[] = [];
+      if (item.selectedColor?.name) parts.push(`Couleur: ${item.selectedColor.name}`);
+      const c = item.customBouquet || item.custom_bouquet;
+      if (c?.bouquet) parts.push(`Bouquet: ${c.bouquet}`);
+      if (c?.chocolat) parts.push(`Chocolat: ${c.chocolat}`);
+      if (c?.parfum) parts.push(`Parfum: ${c.parfum}`);
+      const description = parts.length > 0 ? parts.join(" · ") : undefined;
+      return {
+        price_data: {
+          currency: "eur",
+          product_data: {
+            name: item.name,
+            description,
+            images: item.image ? [item.image] : undefined,
+          },
+          unit_amount: Math.round(item.price * 100),
         },
-        unit_amount: Math.round(item.price * 100),
-      },
-      quantity: item.quantity,
-    }));
+        quantity: item.quantity,
+      };
+    });
 
     const baseUrl = Deno.env.get("SITE_URL") || "https://azizdhouib.github.io/Tendancescreation";
 
